@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".SendMessageActivity">
+
+    <EditText
+        android:id="@+id/textMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Message"
+        android:inputType="textMultiLine"
+        android:lines="8"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/receiverUserName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        android:hint="Receiver Username"
+        android:inputType="text"
+        android:singleLine="true"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/sendMessageButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#D7E2B8"
+        android:onClick="sendMessage"
+        android:text="Send"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/responseTextSend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Connection Status."
+        android:lines="5"
+        android:textAlignment="center"
+        android:textColor="#FF0000"
+        android:textStyle="bold" />
+
+</LinearLayout>
