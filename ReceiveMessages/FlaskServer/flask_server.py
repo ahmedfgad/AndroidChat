@@ -99,7 +99,6 @@ def verify_code(email, verification_code):
 def send(msg_received):
     text_msg = msg_received["msg"]
     sender_username = msg_received["sender_username"]
-    sender_username = decrypt_text(sender_username)
 
     receiver_username = msg_received["receiver_username"]
 

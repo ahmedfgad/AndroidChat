@@ -1,6 +1,7 @@
 import flask
 import mysql.connector
 import sys
+import json
 import smtplib, ssl
 from email.mime.text import MIMEText
 import cryptography.fernet
@@ -20,6 +21,10 @@ def chat():
         return verify(msg_received)
     elif msg_subject == "send":
         return send(msg_received)
+    elif msg_subject == "receive_chats":
+        return receive_chats(msg_received)
+    elif msg_subject == "receive_messages":
+        return receive_messages(msg_received)
     else:
         return "Invalid request."
 
@@ -124,6 +129,72 @@ def send(msg_received):
 
     print("Received message from :", sender_username, "(", text_msg, ") to be sent to ", receiver_username)
     return "success"
+
+def receive_chats(msg_received):
+    receiver_username = msg_received["receiver_username"]
+
+    select_query = "SELECT first_name, last_name FROM users where username = " + "'" + receiver_username + "'"
+    db_cursor.execute(select_query)
+    records = db_cursor.fetchall()
+    if len(records) == 0:
+        return "Invalid receiver username."
+
+    select_query = "SELECT DISTINCT sender_username FROM messages where receiver_username = " + "'" + receiver_username + "'"
+    db_cursor.execute(select_query)
+    records = db_cursor.fetchall()
+    if len(records) == 0:
+        print("No messages delivered for username " + receiver_username)
+        return "0"
+
+    all_chats = {}
+    for record_idx in range(len(records)):
+        curr_record = records[record_idx]
+        sender_username = curr_record[0]
+
+        curr_chat = {}
+        curr_chat["username"] = sender_username 
+
+        all_chats[str(record_idx)] = curr_chat
+
+    all_chats = json.dumps(all_chats)
+    print("Sending Chat(s) :", all_chats)
+    return all_chats
+
+def receive_messages(msg_received):
+    receiver_username = msg_received["receiver_username"]
+
+    sender_username = msg_received["sender_username"]
+
+    select_query = "SELECT * FROM users where username = " + "'" + receiver_username + "'"
+    db_cursor.execute(select_query)
+    records = db_cursor.fetchall()
+    if len(records) == 0:
+        return "Invalid receiver username."
+
+    select_query = "SELECT message, receive_date, sender_username FROM messages where (receiver_username = " + "'" + receiver_username + "' AND sender_username = " + "'" + sender_username + "') OR (receiver_username = " + "'" + sender_username + "' AND sender_username = " + "'" + receiver_username + "') ORDER BY receive_date DESC"
+    db_cursor.execute(select_query)
+    records = db_cursor.fetchall()
+    if len(records) == 0:
+        print("No messages delivered for username " + receiver_username)
+        return "0"
+
+    all_messages = {}
+    for record_idx in range(len(records)):
+        curr_record = records[record_idx]
+        message = curr_record[0]
+        receiveDate = curr_record[1]
+        sender_username = curr_record[2]
+
+        curr_message = {}
+        curr_message["message"] = message
+        curr_message["date"] = str(receiveDate)
+        curr_message["sender_username"] = sender_username
+
+        all_messages[str(record_idx)] = curr_message
+
+    all_messages = json.dumps(all_messages)
+    print("Sending message(s) :", all_messages)
+    return all_messages
 
 def encrypt_text(text_to_encrypt):
     key_file1 = open("encryption_key1.key", "rb")
